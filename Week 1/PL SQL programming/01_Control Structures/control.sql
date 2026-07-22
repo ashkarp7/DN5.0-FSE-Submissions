@@ -1,57 +1,52 @@
+--add a column isVIP in customers table if not exists
+--ALTER TABLE Customers ADD (isVIP VARCHAR2(10));
 
 DECLARE
-
-    CURSOR c_accounts IS
-        SELECT account_id, customer_name, balance
-        FROM customer_balances;
-
-    v_bonus NUMBER(10, 2);
-    v_new_balance NUMBER(10, 2);
-    v_tier VARCHAR2(20);
+    v_age NUMBER;
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('--- PROCESSING ACCOUNT TIER UPDATES ---');
 
+    FOR c IN (SELECT CustomerID, Name, DOB, Balance FROM Customers)
+    LOOP
 
-    FOR r_acc IN c_accounts LOOP
+        v_age := FLOOR(MONTHS_BETWEEN(SYSDATE, c.DOB) / 12);
 
-        IF r_acc.balance >= 10000 THEN
-            v_bonus := r_acc.balance * 0.05;
-            v_new_balance := r_acc.balance + v_bonus;
-            v_tier := 'VIP';
-
-            DBMS_OUTPUT.PUT_LINE('Customer ' || r_acc.customer_name || ' upgraded to VIP. Bonus: $' || v_bonus);
-
-        ELSIF r_acc.balance >= 1000 AND r_acc.balance < 10000 THEN
-            v_bonus := r_acc.balance * 0.02;
-            v_new_balance := r_acc.balance + v_bonus;
-            v_tier := 'PREMIUM';
-
-            DBMS_OUTPUT.PUT_LINE('Customer ' || r_acc.customer_name || ' upgraded to Premium. Bonus: $' || v_bonus);
-
-        ELSE
-
-            v_new_balance := r_acc.balance - 5.00;
-            v_tier := 'LOW BALANCE';
-
-            DBMS_OUTPUT.PUT_LINE('Customer ' || r_acc.customer_name || ' penalized below minimum balance threshold.');
+  
+        IF v_age > 60 THEN
+            UPDATE Loans
+            SET InterestRate = InterestRate - 1
+            WHERE CustomerID = c.CustomerID;
         END IF;
 
-        UPDATE customer_balances
-        SET balance = v_new_balance,
-            account_tier = v_tier
-        WHERE account_id = r_acc.account_id;
 
-        INSERT INTO transaction_logs (account_id, log_message)
-        VALUES (r_acc.account_id, 'Tier updated to ' || v_tier || '. Adjusted Balance: ' || v_new_balance);
+        IF c.Balance > 10000 THEN
+            UPDATE Customers
+            SET IsVIP = 'TRUE'
+            WHERE CustomerID = c.CustomerID;
+        ELSE
+            UPDATE Customers
+            SET IsVIP = 'FALSE'
+            WHERE CustomerID = c.CustomerID;
+        END IF;
+    END LOOP;
 
+
+    FOR l IN (
+        SELECT c.Name, l.LoanID, l.EndDate
+        FROM Customers c
+        JOIN Loans l
+        ON c.CustomerID = l.CustomerID
+        WHERE l.EndDate BETWEEN SYSDATE AND SYSDATE + 30
+    )
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(
+            'Reminder: Dear ' || l.Name ||
+            ', your Loan ID ' || l.LoanID ||
+            ' is due on ' || TO_CHAR(l.EndDate, 'DD-MON-YYYY')
+        );
     END LOOP;
 
     COMMIT;
-    DBMS_OUTPUT.PUT_LINE('Database batch updates completed successfully.');
 
-EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('Critical operational failure. Stack Message: ' || SQLERRM);
+    DBMS_OUTPUT.PUT_LINE('All operations completed successfully.');
 END;
 /
