@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build FinancialPredictor",
+      "type": "shell",
+      "command": "javac -d \"${workspaceFolder}/bin\" \"${workspaceFolder}/Week 1/Data Structures and Algorithms/07_Financial_Forecasting/FinancialPredictor.java\"",
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

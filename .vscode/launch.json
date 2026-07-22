@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug FinancialPredictor",
+      "request": "launch",
+      "mainClass": "FinancialPredictor",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "preLaunchTask": "build FinancialPredictor"
+    }
+  ]
+}
