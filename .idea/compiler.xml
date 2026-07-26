@@ -6,10 +6,19 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="JUnitExercises" />
-        <module name="SLF4JLoggingExercises" />
-        <module name="MockitoExercises" />
+        <module name="LibraryManagement" />
+        <module name="spring-learn" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="JUnitExercises" target="11" />
+      <module name="MockitoExercises" target="11" />
+      <module name="SLF4JLoggingExercises" target="11" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="spring-learn" options="-parameters" />
+    </option>
   </component>
 </project>
